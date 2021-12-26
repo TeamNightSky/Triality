@@ -1,0 +1,22 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool]
+[tool.poetry]
+authors = ["TeamNightSky"]
+description = ""
+name = "triality"
+version = "0.1.0"
+[tool.poetry.dependencies]
+py-cord = "git+https://github.com/Pycord-Development/pycord"
+python = "^3.8"
+supabase = ""
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+isort = "^5.10.1"
+black = "^21.12b0"
+
+[tool.isort]
+profile = "black"
+

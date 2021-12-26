@@ -1,0 +1,6 @@
+name: Code Styling Enforcement
+
+on:
+  push:
+    branches:
+      - master
