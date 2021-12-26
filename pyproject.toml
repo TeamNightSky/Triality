@@ -1,23 +1,32 @@
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
-
-[tool]
 [tool.poetry]
-authors = ["TeamNightSky"]
-description = ""
-name = "triality"
+authors = ["TeamNightSky <teamnightsky.gh@gmail.com>"]
+description = "The third iteration of AdventureBot"
+name = "Triality"
 version = "0.1.0"
+maintainers = ["GrandMoff100 <nlarsen23.student@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/TeamNightSky/Triality"
+documentation = "https://github.com/TeamNightSky/Triality/tree/master/README.md"
+license = "LGPL-3.0-or-later"
+packages = [
+    { include = "triality" }
+]
+
 [tool.poetry.dependencies]
-py-cord = "git+https://github.com/Pycord-Development/pycord"
 python = "^3.8"
-supabase = ""
+supabase = "0.0.3"
+py-cord = {git = "https://github.com/Pycord-Development/pycord"}
+
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.10.1"
 black = "^21.12b0"
 mypy = "^0.930"
+pre-commit = "2.16.0"
 
 [tool.isort]
 profile = "black"
 
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
