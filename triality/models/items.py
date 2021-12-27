@@ -17,6 +17,7 @@ class WeaponSettings(Model):
     damage: t.Optional[int] = None
 
 
+@dataclass()
 class FarmingSettings(Model):
     plantable: bool = False
     grow_time: t.Optional[int] = None

@@ -11,9 +11,9 @@ class Model:
     def __post_init__(self):
         for name, field in self.__dataclass_fields__.items():
             value = getattr(self, name)
-            if isinstance(value, Model):
+            if isinstance(value, Model) or value is None:
                 continue
-            if isinstance(field.type, type):
+            elif isinstance(field.type, type):
                 if issubclass(field.type, Model):
                     if isinstance(value, dict):
                         setattr(self, name, self._convert_to_model(field.type, value))
@@ -55,8 +55,9 @@ class Model:
 
     def _convert_optional(self, name: str, field: Field, value: t.Any) -> None:
         model_class, *_ = t.get_args(field.type)
-        if issubclass(model_class, Model):
-            setattr(self, name, self._convert_to_model(field.type, value))
+        if isinstance(model_class, type):
+            if issubclass(model_class, Model):
+                setattr(self, name, self._convert_to_model(field.type, value))
 
     def to_json_string(self) -> str:
         return json.dumps(self, cls=DataclassEncoder)
@@ -79,7 +80,7 @@ class DataclassEncoder(json.JSONEncoder):
 
     def convert(self, value: t.Any) -> t.Any:
         if isinstance(value, Model):
-            return value.to_json_string()
+            return value.to_json()
         elif isinstance(value, list) or isinstance(value, tuple):
             return [self.convert(item) for item in value]
         elif isinstance(value, dict):
