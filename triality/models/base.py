@@ -6,15 +6,25 @@ from datetime import datetime
 
 from ..const import DATETIME_FORMAT
 
+if t.TYPE_CHECKING:
+    from ..core.storage import StorageClient
 
-class Model:
+
+class BaseModel:
     def __post_init__(self):
         for name, field in self.__dataclass_fields__.items():
-            value = getattr(self, name)
-            if isinstance(value, Model) or value is None:
+            if not field.init:
                 continue
-            elif isinstance(field.type, type):
-                if issubclass(field.type, Model):
+
+            value = getattr(self, name)
+            if value is None:
+                continue
+            elif isinstance(value, Model):
+                continue
+
+            if isinstance(field.type, type):
+                if issubclass(field.type, BaseModel):
+                    print(field.type, value)
                     if isinstance(value, dict):
                         setattr(self, name, self._convert_to_model(field.type, value))
                     else:
@@ -69,13 +79,23 @@ class Model:
         return DataclassEncoder().default(self)
 
 
+class Model(BaseModel):
+    _db: "StorageClient"
+
+
 class DataclassEncoder(json.JSONEncoder):
-    def default(self, model: Model) -> t.Dict[str, t.Any]:
+    def default(self, model: BaseModel) -> t.Dict[str, t.Any]:
         data = {}
-        for name in model.__dataclass_fields__:  # type: ignore[attr-defined]
-            if not name.startswith("_"):
-                if value := self.convert(getattr(model, name, None)):
-                    data[name] = value
+        for name, field in model.__dataclass_fields__.items():  # type: ignore[attr-defined]
+            if name.startswith("_"):
+                continue
+            elif not field.init:
+                continue
+            try:
+                value = self.convert(getattr(model, name))
+                data[name] = value
+            except AttributeError:
+                pass
         return data
 
     def convert(self, value: t.Any) -> t.Any:

@@ -1,12 +1,16 @@
 import typing as t
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from .base import Model
 
+if t.TYPE_CHECKING:
+    from ..core.storage import StorageClient
+
 
 @dataclass()
 class Bid(Model):
+    _db: "StorageClient" = field(init=False, repr=False)
     bidder: int
     amount: int
     timestamp: datetime
@@ -14,6 +18,7 @@ class Bid(Model):
 
 @dataclass()
 class Auction(Model):
+    _db: "StorageClient" = field(init=False, repr=False)
     snowflake: int
     item: str
     amount: int

@@ -15,7 +15,11 @@ from .storage import StorageClient
 
 class Triality(Bot):
     log: logging.Logger
-    extensions: t.List[str] = []
+    extensions: t.List[str] = [
+        "triality.core.cogs.money",
+        "triality.core.cogs.items",
+        "triality.core.cogs.sudo",
+    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self.log = logging.getLogger("triality")
@@ -27,13 +31,15 @@ class Triality(Bot):
         for extension in self.extensions:
             self.init_extension(extension)
 
-    async def on_ready(self):
-        items = await self.storage.all_items()
-        print(items)
+        self.log.info("Finished loading bot")
+
+    async def on_ready(self) -> None:
+        print("Logged in as", self.user, "ID:", self.user.id)
 
     def init_extension(self, ext: str) -> None:
         try:
             self.load_extension(ext)
+            self.log.info("Loaded %s", ext)
         except (
             ExtensionNotFound,
             ExtensionAlreadyLoaded,
@@ -44,13 +50,13 @@ class Triality(Bot):
 
     def setup_logger(self) -> None:
         formatter = logging.Formatter(
-            fmt="[%(asctime)s][%(levelname)s][%(module)6s.%(funcName)-8s]: %(message)s",
+            fmt="[%(asctime)s][%(levelname)s][%(module)s.%(funcName)s]: %(message)s",
             datefmt="%y-%m-%dT%I:%M:%S",
         )
         stdout = logging.StreamHandler(sys.stdout)
         stdout.setFormatter(formatter)
         self.log.addHandler(stdout)
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.INFO)
         self.log.propagate = False
 
     def setup_other_loggers(self) -> None:
