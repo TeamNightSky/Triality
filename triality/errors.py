@@ -1,3 +1,11 @@
+"""
+Copyright (C) 2021, Zebulon Taylor and Nate Larsen.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+"""
+
 from discord import User
 from discord.ext.commands import (  # type: ignore[attr-defined]
     CommandError,
@@ -18,7 +26,10 @@ class ItemNotFound(UserInputError):
 
 
 class NotEnoughMoney(UserInputError):
-    pass
+    def __init__(self, user: User, amount: int):
+        self.user = user
+        self.amount = amount
+        super().__init__(f"{user.name} doesn't have {amount} coins")
 
 
 class NotEnoughItems(UserInputError):

@@ -1,3 +1,11 @@
+"""
+Copyright (C) 2021, Zebulon Taylor and Nate Larsen.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+"""
+
 import datetime
 import logging
 import sys
@@ -5,7 +13,7 @@ import typing as t
 from dataclasses import asdict
 
 from discord import Color, Embed, Interaction
-from discord.commands import ApplicationContext
+from discord.commands import ApplicationContext  # type: ignore
 from discord.embeds import _EmptyEmbed
 from discord.errors import (
     ExtensionAlreadyLoaded,
@@ -18,7 +26,7 @@ from discord.ext.pages import Paginator  # type: ignore[attr-defined]
 from discord.ui import Button
 
 from triality import const
-from triality.core.storage import StorageClient
+from triality.core.manager import StorageManager
 from triality.utils import Field
 
 
@@ -31,7 +39,7 @@ class Triality(Bot):
         self.setup_other_loggers()
         super().__init__(*args, **kwargs)
 
-        self.storage = StorageClient(self)
+        self.storage = StorageManager(self)
         for extension in const.EXTENSIONS:
             self.log.info(f"Loading {extension}")
             self.init_extension(extension)
@@ -60,7 +68,7 @@ class Triality(Bot):
         stdout = logging.StreamHandler(sys.stdout)
         stdout.setFormatter(formatter)
         self.log.addHandler(stdout)
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.INFO)
 
     def setup_other_loggers(self) -> None:
         discord_log = logging.getLogger("discord")

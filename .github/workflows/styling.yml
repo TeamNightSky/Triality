@@ -30,10 +30,10 @@ jobs:
         run: poetry run flake8 .
       - name: Run isort
         run: poetry run isort . --check-only
-      - name: Run black 
+      - name: Run black
         run: poetry run black . --check
   typing:
-    name: Check Types"
+    name: Check Types
     runs-on: ubuntu-latest
     steps:
       - name: Setup Python
@@ -49,4 +49,3 @@ jobs:
       - name: Run mypy
         run: poetry run mypy .
 
-          
