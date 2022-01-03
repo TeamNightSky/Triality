@@ -7,26 +7,34 @@ Triality is aimed at modularity to allow for continuous and sustainable developm
 ## What
 Triality will be an RPG bot with minigames and tons of cool features.
 
+- [ ] **Primary objective:** Error handler
+- [X] Depositing and Withdrawing Coins
 - [ ] Item collection
 - [ ] Item crafting
-- [ ] Farming
+- [X] Farming
 - [ ] Brewing Potions
 - [ ] Buy and sell items
 - [ ] Some sort of battling
 - [ ] Gambling
-- [ ] Working
-- [ ] Slash commands
+- [X] Working
+- [X] Promotions
+- [X] Slash commands
+- [X] Stealing
+- [X] Doing Favors
 - [ ] Pets
+- [ ] Traveling!
+- [ ] Maps
 - [ ] Trading Items
 - [ ] BUTTONS
-- [ ] Clans/alliances/guilds
+- [ ] Alliances and Alliance Effects
 - [ ] Custom Items
 - [ ] Minigames
 - [ ] Achievements
 - [ ] Coops/multi-account profiles
-- [ ] NFTs (if they are still cool by the time the bot is done)
 - [ ] Mining (for resources)
-- [ ] Mobile device user accessibility
+- [ ] Web Dashboard
+- [ ] Pixel Art
+- [ ] Item Quests
 
 ## How
 Check the [docs](lol-these-dont-exist), or use `/help`.

@@ -1,5 +1,5 @@
 import typing as t
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .base import Model
 from .brewing import Brewery
@@ -15,9 +15,7 @@ if t.TYPE_CHECKING:
 
 @dataclass()
 class User(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     snowflake: int  # This is the discord user id field
-    # name: str = "UNKOWN"
     name: str  # Required parameter (this is the users discord name)
     money: Money = Money()
     inventory: Inventory = Inventory()
@@ -26,10 +24,10 @@ class User(Model):
     brewery: Brewery = Brewery()
     pets: PetHouse = PetHouse()
 
-    async def sync_changes(self):
-        data, _ = (
-            await self._db.from_("Users")
-            .eq("snowflake", self.snowflake)
+    async def sync_changes(self, storage: "StorageClient"):
+        query = (
+            storage.db.from_("Users")
             .update(self.to_json())
-            .execute()
+            .eq("snowflake", str(self.snowflake))
         )
+        await storage.request(query)

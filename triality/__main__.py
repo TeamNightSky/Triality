@@ -9,7 +9,8 @@ bot = Triality(
     description=DESCRIPTION,
     owner_id=OWNER_ID,
     max_messages=MAX_MESSAGES,
-    command_prefix="\\/",  # For testing when slash commands are being slow/not working
+    command_prefix=".",
+    help_command=None,
     activity=discord.Activity(
         type=discord.ActivityType.listening,
         name="Screams of the Devil",
@@ -17,4 +18,6 @@ bot = Triality(
     status=discord.Status.online,
 )
 
-bot.run(os.getenv("BOT_TOKEN"))
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

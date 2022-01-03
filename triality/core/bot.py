@@ -1,25 +1,29 @@
+import datetime
 import logging
 import sys
 import typing as t
+from dataclasses import asdict
 
-from discord import (
+from discord import Color, Embed, Interaction
+from discord.commands import ApplicationContext
+from discord.embeds import _EmptyEmbed
+from discord.errors import (
     ExtensionAlreadyLoaded,
     ExtensionFailed,
     ExtensionNotFound,
     NoEntryPointError,
 )
 from discord.ext.commands import Bot  # type: ignore[attr-defined]
+from discord.ext.pages import Paginator  # type: ignore[attr-defined]
+from discord.ui import Button
 
-from .storage import StorageClient
+from triality import const
+from triality.core.storage import StorageClient
+from triality.utils import Field
 
 
 class Triality(Bot):
     log: logging.Logger
-    extensions: t.List[str] = [
-        "triality.core.cogs.money",
-        "triality.core.cogs.items",
-        "triality.core.cogs.sudo",
-    ]
 
     def __init__(self, *args, **kwargs) -> None:
         self.log = logging.getLogger("triality")
@@ -28,18 +32,18 @@ class Triality(Bot):
         super().__init__(*args, **kwargs)
 
         self.storage = StorageClient(self)
-        for extension in self.extensions:
+        for extension in const.EXTENSIONS:
+            self.log.info(f"Loading {extension}")
             self.init_extension(extension)
 
         self.log.info("Finished loading bot")
 
     async def on_ready(self) -> None:
-        print("Logged in as", self.user, "ID:", self.user.id)
+        self.log.info("Logged in as %s ID: %s", self.user, self.user.id)
 
     def init_extension(self, ext: str) -> None:
         try:
             self.load_extension(ext)
-            self.log.info("Loaded %s", ext)
         except (
             ExtensionNotFound,
             ExtensionAlreadyLoaded,
@@ -56,9 +60,63 @@ class Triality(Bot):
         stdout = logging.StreamHandler(sys.stdout)
         stdout.setFormatter(formatter)
         self.log.addHandler(stdout)
-        self.log.setLevel(logging.INFO)
-        self.log.propagate = False
+        self.log.setLevel(logging.DEBUG)
 
     def setup_other_loggers(self) -> None:
         discord_log = logging.getLogger("discord")
-        discord_log.setLevel(logging.CRITICAL)
+        discord_log.setLevel(logging.DEBUG)
+
+    async def embed_response(
+        self,
+        ctx: ApplicationContext,
+        title: t.Union[str, _EmptyEmbed] = Embed.Empty,
+        content: t.Union[str, _EmptyEmbed] = Embed.Empty,
+        fields: t.Iterable[Field] = [],
+        footer: t.Union[str, _EmptyEmbed] = Embed.Empty,
+        image_url: t.Union[str, _EmptyEmbed] = Embed.Empty,
+        footer_icon_url: t.Union[str, _EmptyEmbed] = Embed.Empty,
+        success: bool = True,
+        edit: bool = False,
+        follow_up=False,
+        dry=False,
+    ) -> t.Union[Interaction, Embed]:
+        if success:
+            color = ctx.user.color
+        else:
+            color = Color.red()
+
+        embed = Embed(
+            color=color,
+            title=title,
+            description=content,
+            timestamp=datetime.datetime.utcnow(),
+        )
+        embed.set_author(name=self.user.display_name, icon_url=self.user.avatar.url)
+
+        if footer is not None:
+            embed.set_footer(text=footer)
+        if image_url is not None:
+            embed.set_image(url=image_url)
+
+        for field in fields:
+            embed.add_field(**asdict(field))
+        if dry:
+            return embed
+        elif edit:
+            await ctx.response.edit_message(embed=embed)
+            return ctx.interaction
+        elif follow_up:
+            return await ctx.followup(embed=embed)
+        else:
+            return await ctx.respond(embed=embed)
+
+    async def page_response(
+        self,
+        ctx: ApplicationContext,
+        pages: t.List[Embed],
+        buttons: t.List[Button],
+        ephemeral=False,
+    ):
+        await ctx.defer()
+        paginator = Paginator(pages=pages, show_indicator=True, show_disabled=False)
+        await paginator.respond(ctx.interaction, ephemeral=ephemeral)

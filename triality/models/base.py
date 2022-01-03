@@ -1,22 +1,19 @@
 import json
 import re
 import typing as t
-from dataclasses import Field
+from dataclasses import Field, fields
 from datetime import datetime
 
 from ..const import DATETIME_FORMAT
 
-if t.TYPE_CHECKING:
-    from ..core.storage import StorageClient
-
 
 class BaseModel:
     def __post_init__(self):
-        for name, field in self.__dataclass_fields__.items():
+        for field in fields(self):
             if not field.init:
                 continue
 
-            value = getattr(self, name)
+            value = getattr(self, field.name)
             if value is None:
                 continue
             elif isinstance(value, Model):
@@ -24,50 +21,51 @@ class BaseModel:
 
             if isinstance(field.type, type):
                 if issubclass(field.type, BaseModel):
-                    print(field.type, value)
                     if isinstance(value, dict):
-                        setattr(self, name, self._convert_to_model(field.type, value))
+                        setattr(
+                            self, field.name, self._convert_to_model(field.type, value)
+                        )
                     else:
                         raise ValueError(
                             f"Json data {value!r} could not be converted to model type {field.type!r}"
                         )
             elif origin := t.get_origin(field.type):
                 if origin is list or origin is tuple:
-                    self._convert_sequence(name, field, value)
+                    self._convert_sequence(field, value)
                 elif origin is dict:
-                    self._convert_dict(name, field, value)
+                    self._convert_dict(field, value)
                 elif origin is t.Union:
-                    self._convert_optional(name, field, value)
+                    self._convert_optional(field, value)
 
     def _convert_to_model(self, model_class: type, value: dict) -> "Model":
         return model_class(**value)
 
-    def _convert_sequence(self, name: str, field: Field, value: t.Any) -> None:
+    def _convert_sequence(self, field: Field, value: t.Any) -> None:
         model_class, *_ = t.get_args(field.type)
         if issubclass(model_class, Model):
             setattr(
                 self,
-                name,
+                field.name,
                 [self._convert_to_model(model_class, item) for item in value],
             )
 
-    def _convert_dict(self, name: str, field: Field, value: t.Any) -> None:
+    def _convert_dict(self, field: Field, value: t.Any) -> None:
         _, model_class, *_ = t.get_args(field.type)
         if issubclass(model_class, Model):
             setattr(
                 self,
-                name,
+                field.name,
                 {
                     key: self._convert_to_model(model_class, sub_value)
                     for key, sub_value in value.items()
                 },
             )
 
-    def _convert_optional(self, name: str, field: Field, value: t.Any) -> None:
+    def _convert_optional(self, field: Field, value: t.Any) -> None:
         model_class, *_ = t.get_args(field.type)
         if isinstance(model_class, type):
             if issubclass(model_class, Model):
-                setattr(self, name, self._convert_to_model(field.type, value))
+                setattr(self, field.name, self._convert_to_model(field.type, value))
 
     def to_json_string(self) -> str:
         return json.dumps(self, cls=DataclassEncoder)
@@ -80,20 +78,20 @@ class BaseModel:
 
 
 class Model(BaseModel):
-    _db: "StorageClient"
+    pass
 
 
 class DataclassEncoder(json.JSONEncoder):
     def default(self, model: BaseModel) -> t.Dict[str, t.Any]:
         data = {}
-        for name, field in model.__dataclass_fields__.items():  # type: ignore[attr-defined]
-            if name.startswith("_"):
+        for field in fields(model):  # type: ignore[attr-defined]
+            if field.name.startswith("_"):
                 continue
             elif not field.init:
                 continue
             try:
-                value = self.convert(getattr(model, name))
-                data[name] = value
+                value = self.convert(getattr(model, field.name))
+                data[field.name] = value
             except AttributeError:
                 pass
         return data

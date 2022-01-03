@@ -5,13 +5,20 @@ OWNER_ID = 301055957734129665
 
 ADMINS = (515854207837011970,)
 
-ADMIN_ROLE = 925194207281422366
-
-DEV_SERVER = 798004434021384264
+DEV_SERVERS = [798004434021384264]
 
 DESCRIPTION = ""
 MAX_MESSAGES = 2000
+RANDOM_WEIGHT_ACCURACY = 10 ** 5
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
+
+EXTENSIONS = [
+    "triality.core.cogs.basic.items",
+    "triality.core.cogs.basic.money",
+    "triality.core.cogs.basic.farm",
+    "triality.core.cogs.error",
+    "triality.core.cogs.sudo",
+]
 
 RARITY_TABLE = {
     "MYTHIC": (0, 5),

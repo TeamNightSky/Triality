@@ -1,48 +1,47 @@
 import typing as t
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ..const import RARITY_TABLE
 from .base import Model
-from .farming import HarvestItems
 
 if t.TYPE_CHECKING:
-    from ..core.storage import StorageClient
+    from triality.core.storage import StorageClient
 
 
 @dataclass()
 class GeneralSettings(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     unlock_area: t.Optional[str] = None
     spawnable: bool = True
 
 
 @dataclass()
 class WeaponSettings(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     weapon: bool = False
     damage: t.Optional[int] = None
 
 
 @dataclass()
 class FarmingSettings(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     plantable: bool = False
     grow_time: t.Optional[int] = None
-    harvest_items: t.Optional[HarvestItems] = None
-    needs_water_every: t.Optional[int] = None
+    harvest_items: t.Optional[t.Dict[str, int]] = None
+
+
+@dataclass()
+class MarketSettings(Model):
+    buyable: bool = True
 
 
 @dataclass()
 class ItemSettings(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     general: GeneralSettings = GeneralSettings()
     weapon: WeaponSettings = WeaponSettings()
     farming: FarmingSettings = FarmingSettings()
+    market: MarketSettings = MarketSettings()
 
 
 @dataclass()
 class Item(Model):
-    _db: "StorageClient" = field(init=False, repr=False)
     name: str
     slug: str
     description: str
@@ -70,3 +69,7 @@ class Item(Model):
     @property
     def buyable(self):
         return self.cost is not None
+
+    async def sync_changes(self, storage: "StorageClient") -> None:
+        query = storage.db.from_("Items").update(self.to_json()).eq("slug", self.slug)
+        await storage.request(query)
