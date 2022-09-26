@@ -32,20 +32,5 @@ jobs:
         run: poetry run isort . --check-only
       - name: Run black
         run: poetry run black . --check
-  typing:
-    name: Check Types
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Python
-        uses: actions/setup-python@v2
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Install workflow dependencies
-        run: pip install poetry
-      - name: Install Project Dependencies
-        run: poetry install --no-root
-      - name: Run mypy
+      - run: Run Mypy
         run: poetry run mypy .
-
