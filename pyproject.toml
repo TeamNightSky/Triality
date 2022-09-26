@@ -14,8 +14,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-py-cord = {git = "https://github.com/Pycord-Development/pycord"}
-postgrest-py = {git = "https://github.com/supabase-community/postgrest-py"}
+nextcord = "^2.2.0"
+postgrest-py = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
